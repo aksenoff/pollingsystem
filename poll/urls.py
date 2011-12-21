@@ -1,12 +1,21 @@
-from django.conf.urls.defaults import patterns, include, url
+from django.conf.urls.defaults import *
+from django.views.generic import DetailView, ListView
+from poll.models import Poll
 
-# Uncomment the next two lines to enable the admin:
-from django.contrib import admin
-admin.autodiscover()
-
-urlpatterns = patterns('poll.views',
-    url(r'^$', 'index'),
-    url(r'^(?P<poll_id>\d+)/$', 'detail'),
-    url(r'^(?P<poll_id>\d+)/results/$', 'results'),
-    url(r'^(?P<poll_id>\d+)/vote/$', 'vote'),
+urlpatterns = patterns('',
+    url(r'^$',
+        ListView.as_view(
+            queryset=Poll.objects.order_by('-pub_date')[:5],
+            context_object_name='latest_poll_list',
+            template_name='poll/index.html')),
+    url(r'^(?P<pk>\d+)/$',
+        DetailView.as_view(
+            model=Poll,
+            template_name='poll/detail.html')),
+    url(r'^(?P<pk>\d+)/results/$',
+        DetailView.as_view(
+            model=Poll,
+            template_name='poll/results.html'),
+            name='poll_results'),
+    url(r'^(?P<poll_id>\d+)/vote/$', 'poll.views.vote'),
 )
