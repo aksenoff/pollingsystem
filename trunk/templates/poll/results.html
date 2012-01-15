@@ -1,7 +1,7 @@
-<h1>{{ poll.question }}</h1>
+<h1>{{ poll.caption }}</h1>
 <ul>
-{% for choice in poll.choice_set.all %}
-<li>{{ choice.choice }} -- {{ choice.votes }} vote{{ choice.votes|pluralize }}</li>
+{% for question in poll.question_set.all %}
+<li>{{ question.caption }}</li>
 {% endfor %}
 </ul>
 <a href="/poll/{{ poll.id }}/">Vote again?</a>
