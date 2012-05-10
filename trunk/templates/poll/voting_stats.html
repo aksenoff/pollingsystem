@@ -1,0 +1,8 @@
+<h1>{{ voting.poll.caption }}: {{ voting.date_held }}</h1>
+{% for question in voting.poll.question_set.all %}
+ {{ question.number }}. {{ question.caption }}
+ <ul>{% for choice in question.choice_set.all %} 
+  <li>{{ choice.choice }} - {{ choice.result_set.count }}</li> 
+  TODO: переделать на результаты, агрегированные по голосованию
+ {% endfor %}</ul>
+{% endfor %}
