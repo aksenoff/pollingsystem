@@ -8,6 +8,7 @@ urlpatterns = patterns('',
         DetailView.as_view(
             model=Voting,
             template_name='poll/detail.html')),
+    url(r'stats/$', 'poll.views.stats'),
     url(r'^stats/(?P<pk>\d+)/$',
         DetailView.as_view(
             model=Poll,
@@ -25,6 +26,6 @@ urlpatterns = patterns('',
         DetailView.as_view(
             model=Voting,
             template_name='poll/voting_stats_tickets.html')),
-    url(r'^(?P<poll_id>\d+)/vote/$', 'poll.views.vote'),
+    url(r'^(?P<voting_id>\d+)/vote/$', 'poll.views.vote'),
     url(r'^select/$', 'poll.views.poll_select'),
 )
