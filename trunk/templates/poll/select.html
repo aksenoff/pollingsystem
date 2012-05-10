@@ -1,0 +1,9 @@
+<h1>Ваш тикет {{ ticket }}, вы - {{ ticket.name }}</h1>
+Голосования, в которых вы можете принять участие:
+<ul>
+{% for voting in votings %}
+ <li><a href="/poll/{{ voting.id }}/">{{ voting.poll.caption }} ({{ voting.date_held }})</a></li>
+{% empty %}
+ Ничего нет.
+{% endfor %}
+</ul>

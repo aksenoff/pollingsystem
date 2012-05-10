@@ -35,7 +35,7 @@ class Voting(models.Model):
     poll = models.ForeignKey(Poll)
     closed = models.BooleanField(verbose_name='voting closed?')
     def __unicode__(self):
-        return str(self.date_held) + u" " + str(self.poll)
+        return unicode(self.date_held) + u" " + unicode(self.poll)
 
 class Ticket(models.Model):
     code = models.CharField(max_length=10, primary_key=True)#, editable=False)
@@ -44,7 +44,7 @@ class Ticket(models.Model):
     name = models.CharField(max_length=100)
     comment = models.TextField(max_length=200, help_text="Extra info about the person", blank=True)
     def __unicode__(self):
-        return self.code + u' ' + str(self.poll)
+        return self.code + u" " + unicode(self.poll)
 
 class Result(models.Model):
     ticket = models.ForeignKey(Ticket)

@@ -1,21 +1,30 @@
 from django.conf.urls.defaults import *
 from django.views.generic import DetailView, ListView
-from poll.models import Poll
+from poll.models import Poll, Voting
 
 urlpatterns = patterns('',
-    url(r'^$',
-        ListView.as_view(
-            queryset=Poll.objects.order_by('-pub_date')[:5],
-            context_object_name='latest_poll_list',
-            template_name='poll/index.html')),
+    url(r'^$', 'poll.views.enter_ticket'),
     url(r'^(?P<pk>\d+)/$',
         DetailView.as_view(
-            model=Poll,
+            model=Voting,
             template_name='poll/detail.html')),
-    url(r'^(?P<pk>\d+)/results/$',
+    url(r'^stats/(?P<pk>\d+)/$',
         DetailView.as_view(
             model=Poll,
-            template_name='poll/results.html'),
-            name='poll_results'),
+            template_name='poll/poll_stats.html'),
+        name='poll_results'),
+    url(r'^stats/(?P<pk>\d+)/tickets/$',
+        DetailView.as_view(
+            model=Poll,
+            template_name='poll/poll_stats_tickets.html')),
+    url(r'^stats/voting/(?P<pk>\d+)/$',
+        DetailView.as_view(
+            model=Voting,
+            template_name='poll/voting_stats.html')),
+    url(r'^stats/voting/(?P<pk>\d+)/tickets/$',
+        DetailView.as_view(
+            model=Voting,
+            template_name='poll/voting_stats_tickets.html')),
     url(r'^(?P<poll_id>\d+)/vote/$', 'poll.views.vote'),
+    url(r'^select/$', 'poll.views.poll_select'),
 )
