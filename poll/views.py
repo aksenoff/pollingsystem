@@ -5,6 +5,7 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
+import datetime
     
 def vote(request, voting_id):
     voting = get_object_or_404(Voting, pk=voting_id)
@@ -31,7 +32,7 @@ def enter_ticket(request):
 
 def poll_select(request):
 	try:
-		my_ticket = Ticket.objects.get(pk = int(request.POST['ticket']))
+		my_ticket = Ticket.objects.get(pk=int(request.POST['ticket']))
 	except (KeyError, ValueError, Ticket.DoesNotExist):
 		return render_to_response('poll/enter_ticket.html', {
 			'error_message': "No such ticket",
@@ -41,8 +42,17 @@ def poll_select(request):
 			'ticket': my_ticket, 'votings': my_ticket.poll.voting_set.filter(closed=False)
 			})
 
-def stats(request):
-    polls = Poll.objects.all()
-    return render_to_response('poll/stats.html', {
-        'polls': polls,
+def start_voting(request, poll_id):
+    current_poll = Poll.objects.get(pk=poll_id)
+    current_voting = Voting.objects.create(date_held = datetime.datetime.now(), poll=current_poll, closed=False)
+    return render_to_response('poll/voting_in_progress.html', {
+        'voting': current_voting,
+        })
+
+def stop_voting(request, voting_id):
+    current_voting = Voting.objects.get(pk=voting_id)
+    current_voting.closed = True;
+    current_voting.save()
+    return render_to_response('poll/voting_stopped.html', {
+        'voting': current_voting,
         })
