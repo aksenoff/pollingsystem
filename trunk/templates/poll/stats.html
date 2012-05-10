@@ -1,6 +1,6 @@
 <h1>Статистика опросов и голосований</h1>
 <ul>
-{% for poll in polls %}
+{% for poll in object_list %}
 <p><a href="/poll/stats/{{ poll.id }}/">Опрос "{{ poll.caption }}"</a> (<a href="/poll/stats/{{ poll.id }}/tickets/">с именами проголосовавших</a>)</p>
 Голосования опроса:
 {% for voting in poll.voting_set.all %}
