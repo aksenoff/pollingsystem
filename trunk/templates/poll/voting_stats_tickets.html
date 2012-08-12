@@ -1,13 +1,20 @@
 <h1>{{ voting.poll.caption }}: {{ voting.date_held }}</h1>
 {% for question in voting.poll.question_set.all %}
  {{ question.number }}. {{ question.caption }}
- <ul>{% for choice in question.choice_set.all %} 
-  <li>{{ choice.choice }} - {{ choice.result_set.count }}. Проголосовали: 
-  	{% for result in choice.result_set.all %}
-  	 {{ result.ticket.code }} ({{ result.ticket.name }}) 
-  	 {% empty %} никто
-  	{% endfor %}
-  </li> 
-  TODO: переделать на результаты, агрегированные по голосованию
+ <ul>
+ {% for choice in question.choice_set.all %}
+  {% for question_number, choice_number, result, voters in results %}
+   {% ifequal question.number question_number %}
+    {% ifequal choice.number choice_number %} 
+	  <li>{{ choice.choice }} - {{ result }}. Проголосовали: 
+	  	{% for voter in voters %}
+	  	 {{ voter }}{% if not forloop.last %},{% else %}.{% endif %}
+	  	 {% empty %} никто.
+	  	{% endfor %}
+	  </li> 
+    {% endifequal %}
+   {% endifequal %}
+  {% endfor %} 
  {% endfor %}</ul>
 {% endfor %}
+<a href="/poll/stats/voting/{{ voting.id }}/">без имен проголосовавших</a>

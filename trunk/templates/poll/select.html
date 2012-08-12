@@ -1,9 +1,13 @@
-<h1>Ваш тикет {{ ticket }}, вы - {{ ticket.name }}</h1>
+<h1>Ваш тикет {{ ticket.code }}, вы - {{ ticket.name }}</h1>
+{% if ticket.voted %} Вы уже проголосовали! <br />
+{% else %}
 Голосования, в которых вы можете принять участие:
 <ul>
 {% for voting in votings %}
  <li><a href="/poll/{{ voting.id }}/">{{ voting.poll.caption }} ({{ voting.date_held }})</a></li>
 {% empty %}
- Ничего нет.
+Голосования отсутствуют. Если вы открыли эту страницу до того, как голосование было запущено, обновите ее (клавиша F5)
 {% endfor %}
 </ul>
+{% endif %}
+<a href="/poll/clear_ticket/">Ввести другой тикет</a>
