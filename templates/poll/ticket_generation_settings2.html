@@ -1,0 +1,11 @@
+<h1>Введите имена голосующих</h1>
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+<form action="." method="post">
+{% csrf_token %}
+Помимо нижеперечисленных будет создано {{ num_spare_tickets }} запасных тикетов. <br />
+{% for ticket in tickets %}
+ {{ ticket|add:1 }} <input type="text" name="name{{ ticket }}"> <br />
+{% endfor %}
+<input type="submit" value="Далее" />
+<input type="hidden" name="form2">
+</form>

@@ -42,11 +42,11 @@ class Ticket(models.Model):
     poll = models.ForeignKey(Poll)
     voting = models.ForeignKey(Voting, null=True, blank=True)
     name = models.CharField(max_length=100)
-    active = models.BooleanField()
-    voted = models.BooleanField()
+    active = models.BooleanField(default=True)
+    voted = models.BooleanField(default=False)
     comment = models.TextField(max_length=200, help_text="Extra info about the person", blank=True)
     def __unicode__(self):
-        return self.code + u" " + unicode(self.poll)
+        return self.code + u" " + self.name + u" (" + unicode(self.poll) + u")"
 
 class Result(models.Model):
     ticket = models.ForeignKey(Ticket)

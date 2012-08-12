@@ -9,6 +9,6 @@ urlpatterns = patterns('',
     url(r'^poll/', include('poll.urls')),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', 'views.index'),
-    url(r'^login/$', login, {'template_name' = 'templates/login.html'}),
-    url(r'^logout/$', logout, {'template_name' = 'templates/logout.html'})
+    url(r'^login/', login),
+    url(r'^logout/', logout)
 )
