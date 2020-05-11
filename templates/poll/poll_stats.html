@@ -1,8 +1,0 @@
-<h1>{{ poll.caption }}</h1>
-{% for question in poll.question_set.all %}
- {{ question.number }}. {{ question.caption }}
- <ul>{% for choice in question.choice_set.all %} 
-  <li>{{ choice.choice }} - {{ choice.result_set.count }}</li> 
- {% endfor %}</ul>
-{% endfor %}
-<a href="/poll/stats/{{ poll.id }}/tickets/">с именами проголосовавших</a>

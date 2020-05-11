@@ -1,0 +1,11 @@
+<h1>Текущие голосования</h1>
+Щелкните, чтобы остановить.
+<ul>
+{% for voting in votings %}
+<li>
+	<a href="/poll/stop/{{ voting.id }}/">Остановить голосование {{ voting.poll.caption }}, время начала - {{ voting.date_held }}</a>
+</li>
+{% empty %}
+Нет ни одного запущенного голосования.
+{% endfor %}
+</ul>

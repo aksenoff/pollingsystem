@@ -1,48 +1,48 @@
-# Create your views here.
 # encoding: utf8
 from poll.models import Poll, Choice, Ticket, Voting, Result
-from django.shortcuts import render_to_response, get_object_or_404
+from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponse
-from django.template import RequestContext
-from django.core.urlresolvers import reverse
+# from django.template import RequestContext
+from django.urls import reverse
 import datetime, random
 from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView, DetailView
+from django.core import serializers
     
 def vote(request, voting_id):
     voting = get_object_or_404(Voting, pk=voting_id)
     try:
         selected_choices = {}
         for question in voting.poll.question_set.all():
-            selected_choices[question] = int(request.POST['choice'+unicode(question.number)])
+            selected_choices[question] = int(request.POST['choice'+str(question.number)])
     except (KeyError, Choice.DoesNotExist):
         # Redisplay the poll voting form.
-       return render_to_response('poll/detail.html', {
+       return render('poll/detail.html', {
             'voting': voting,
             'error_message': u"Вы неправильно проголосовали",
-        }, context_instance=RequestContext(request))
+        })
     else:
-        current_ticket = request.session["ticket"]
+        current_ticket = Ticket.objects.get(pk=int(request.session['ticket']))
         for question in selected_choices.keys():
             Result.objects.create(ticket=current_ticket, choice=Choice.objects.get(question=question, number=selected_choices[question]))
             current_ticket.voting = voting
             current_ticket.voted = True
             current_ticket.save()
-            request.session["ticket"] = current_ticket
+            # request.session["ticket"] = current_ticket
 #        # Always return an HttpResponseRedirect after successfully dealing
 #        # with POST data. This prevents data from being posted twice if a
 #        # user hits the Back button.
-        return HttpResponseRedirect(reverse('views.index'))
+        return HttpResponseRedirect(reverse('index'))
 
 def clear_ticket(request):
     if "ticket" in request.session:
         del request.session["ticket"]
-    return HttpResponseRedirect(reverse('poll.views.poll_select'))
+    return HttpResponseRedirect(reverse('poll_select'))
 
 def poll_select(request):
     if "ticket" in request.session:
-        current_ticket = request.session['ticket']
-        return render_to_response('poll/select.html', {
+        current_ticket = Ticket.objects.get(pk=int(request.session['ticket']))
+        return render(request, 'poll/select.html', {
                 'ticket': current_ticket, 'votings': current_ticket.poll.voting_set.filter(closed=False)
                 })
     else:
@@ -50,20 +50,20 @@ def poll_select(request):
             try:
                 passed_ticket = Ticket.objects.get(pk=int(request.POST['ticket']))
             except (KeyError, ValueError, Ticket.DoesNotExist):
-                return render_to_response('poll/enter_ticket.html', {
+                return render(request, 'poll/enter_ticket.html', {
                     'error_message': "Вы ввели недействительный тикет",
-                    }, context_instance=RequestContext(request))
+                    })
             else:
-                request.session["ticket"] = passed_ticket
-                return HttpResponseRedirect(reverse('poll.views.poll_select'))
+                request.session["ticket"] = request.POST['ticket']
+                return HttpResponseRedirect(reverse('poll_select'))
         else:
-            return render_to_response('poll/enter_ticket.html', context_instance=RequestContext(request))
+            return render(request, 'poll/enter_ticket.html')
 
 @login_required(login_url="/login/")
 def start_voting(request, poll_id):
     current_poll = Poll.objects.get(pk=poll_id)
     current_voting = Voting.objects.create(date_held = datetime.datetime.now(), poll=current_poll, closed=False)
-    return render_to_response('poll/voting_in_progress.html', {
+    return render(request, 'poll/voting_in_progress.html', {
         'voting': current_voting,
         })
 
@@ -72,7 +72,7 @@ def stop_voting(request, voting_id):
     current_voting = Voting.objects.get(pk=voting_id)
     current_voting.closed = True;
     current_voting.save()
-    return render_to_response('poll/voting_stopped.html', {
+    return render(request, 'poll/voting_stopped.html', {
         'voting': current_voting,
         })
 
@@ -108,7 +108,7 @@ def voting_stats(request, voting_id):
         for choice in question.choice_set.all():
             result = choice.result_set.filter(ticket__voting__id=voting_id).count()
             results.append((question.number, choice.number, result))
-    return render_to_response('poll/voting_stats.html', {
+    return render(request, 'poll/voting_stats.html', {
         'results': results,
         'voting': voting,
         })
@@ -128,13 +128,13 @@ def voting_stats_tickets(request, voting_id):
                         if r.id==x.id:
                             voters2.append(voter.name)
             results.append((question.number, choice.number, result, voters2))
-    return render_to_response('poll/voting_stats_tickets.html', {
+    return render(request, 'poll/voting_stats_tickets.html', {
         'results': results,
         'voting': voting,
         })
 
 def display_voting(request, voting_id):
-    if "ticket" in request.session and Voting.objects.get(pk=voting_id) in request.session['ticket'].poll.voting_set.all():
+    if "ticket" in request.session and Voting.objects.get(pk=voting_id) in Ticket.objects.get(pk=int(request.session['ticket'])).poll.voting_set.all():
         return DetailView.as_view(
                     model=Voting,
                     template_name='poll/detail.html')(request, pk=voting_id)
@@ -143,16 +143,16 @@ def display_voting(request, voting_id):
 
 @login_required(login_url='/login/')
 def votings_in_progress_list(request):
-    return render_to_response('poll/votings_in_progress_list.html', {
+    return render(request, 'poll/votings_in_progress_list.html', {
                 'votings': Voting.objects.filter(closed=False)
                 })
 
 @login_required(login_url='/login/')
 def generate_tickets(request):
     if request.method != 'POST':
-        return render_to_response('poll/ticket_generation_settings.html', {
+        return render(request, 'poll/ticket_generation_settings.html', {
             'polls': Poll.objects.all()
-            }, context_instance=RequestContext(request))
+            })
     else:
         if 'form1' in request.POST:
             try:
@@ -161,27 +161,27 @@ def generate_tickets(request):
                 request.session["num_tickets"] = int(request.POST['num_tickets'])
                 request.session["num_spare_tickets"] = int(request.POST['num_spare_tickets'])
             except:
-                return render_to_response('poll/ticket_generation_settings.html', {
+                return render(request, 'poll/ticket_generation_settings.html', {
                     'error_message': u'Заполните настройки правильно',
                     'polls': Poll.objects.all(),
-                    }, context_instance=RequestContext(request))
+                    })
             else:
-                return render_to_response('poll/ticket_generation_settings2.html', {
+                return render(request, 'poll/ticket_generation_settings2.html', {
                     'tickets': range(request.session["num_tickets"]),
                     'num_spare_tickets': request.session["num_spare_tickets"],
-                    }, context_instance=RequestContext(request))
+                    })
         elif 'form2' in request.POST:
             try:
                 request.session["names"] = []
                 request.session["tickets"] = []
                 for i in range(request.session["num_tickets"]):
-                    request.session["names"].append(request.POST["name"+unicode(i)])
+                    request.session["names"].append(request.POST["name"+str(i)])
             except:
-                return render_to_response('poll/ticket_generation_settings2.html', {
+                return render(request, 'poll/ticket_generation_settings2.html', {
                     'error_message': u'Заполните настройки правильно',
-                    #'tickets': range(request.session["num_tickets"]),
+                    'tickets': range(request.session["num_tickets"]),
                     'num_spare_tickets': request.session["num_spare_tickets"],
-                    }, context_instance=RequestContext(request))
+                    })
             else:
                 poll = Poll.objects.get(pk=request.session["poll_id"])
                 for i in range(request.session["num_tickets"]):
@@ -191,10 +191,10 @@ def generate_tickets(request):
                     request.session["tickets"].append((code, request.session["names"][i]))
                 for i in range(request.session["num_spare_tickets"]):
                     code = random.randint(100000000000000, 999999999999999)
-                    name = "spare_ticket"+unicode(i+1)
+                    name = "spare_ticket"+str(i+1)
                     Ticket.objects.create(code=code, poll=poll, name=name)
                     request.session["tickets"].append((code, name))                
-                return render_to_response('poll/tickets_for_print.html', {
+                return render(request, 'poll/tickets_for_print.html', {
                     'tickets': request.session["tickets"],
                     'poll': poll,
                     })

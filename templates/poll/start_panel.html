@@ -1,5 +1,0 @@
-<h1>Выберите опрос для запуска</h1>
-<ul>
-{% for poll in object_list %}
- <li><a href="/poll/start/{{ poll.id }}">{{ poll.caption }}</a></li>
-{% endfor %}
