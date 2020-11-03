@@ -25,7 +25,7 @@ SECRET_KEY = '*@50c!upb3&cqv!p1#j5meiq)#tw8zrr0ne4lzn)ues$zqanh='
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['vast-bayou-01836.herokuapp.com']
+ALLOWED_HOSTS = []
 
 
 # Application definition
